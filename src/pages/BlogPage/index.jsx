@@ -218,9 +218,8 @@ const BlogPage = () => {
             Add new job
         </Button>
         </div>
-        <Paper elevation={0}>
           <TableContainer>
-            <Table>
+            <Table className={classes.tableMain}>
               <TableHead className={classes.tableHead}>
                 <TableRow>
                   {tableColumns.map((col, index) => {
@@ -275,7 +274,6 @@ const BlogPage = () => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Paper>
       </main>);
   };
 

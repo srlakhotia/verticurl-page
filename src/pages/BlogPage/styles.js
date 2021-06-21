@@ -214,6 +214,9 @@ const useStyles = makeStyles((theme) => ({
   optionMenuText: {
     verticalAlign: 'text-bottom'
   },
+  tableMain: {
+    border: `1px solid ${colors.lightGrey}`
+  },
   tableHead: {
     backgroundColor: colors.table.headBg,
   },
