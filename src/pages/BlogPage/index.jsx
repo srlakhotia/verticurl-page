@@ -11,7 +11,6 @@ import {
   Hidden,
   Avatar,
   Button,
-  Paper,
   TableContainer,
   Table,
   TableHead,
