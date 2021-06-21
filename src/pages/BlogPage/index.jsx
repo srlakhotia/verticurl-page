@@ -217,7 +217,7 @@ const BlogPage = () => {
             Add new job
         </Button>
         </div>
-          <TableContainer>
+          <TableContainer className={classes.tableContainer}>
             <Table className={classes.tableMain}>
               <TableHead className={classes.tableHead}>
                 <TableRow>

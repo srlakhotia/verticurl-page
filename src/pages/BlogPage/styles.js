@@ -214,8 +214,11 @@ const useStyles = makeStyles((theme) => ({
   optionMenuText: {
     verticalAlign: 'text-bottom'
   },
+  tableContainer: {
+    overflow: 'visible',
+  },
   tableMain: {
-    border: `1px solid ${colors.lightGrey}`
+    boxShadow: `0 0 11px 1px ${colors.lightGrey}`
   },
   tableHead: {
     backgroundColor: colors.table.headBg,
