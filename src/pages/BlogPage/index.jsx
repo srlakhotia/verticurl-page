@@ -242,7 +242,7 @@ const BlogPage = () => {
                 {createRow(jobPostData).map((post, index) => {
                   return <TableRow className={classes.tableRow} key={index}>
                     {tableColumns.map((col, idx) => {
-                      return <TableCell>
+                      return <TableCell key={idx}>
                         {renderTableCell(col.id, post, idx)}
                       </TableCell>
                     })}
