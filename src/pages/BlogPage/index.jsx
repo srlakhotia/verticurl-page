@@ -79,7 +79,8 @@ const BlogPage = () => {
     IS_ACTIVE: 'isActive',
     POSTED: 'posted',
     APPLICATIONS: 'applications',
-    OPTIONS: 'options'
+    OPTIONS: 'options',
+    JOB_ID: 'id'
   }
 
   const tableColumns = [{
@@ -139,7 +140,8 @@ const BlogPage = () => {
         [`${CELL_TYPE.IS_ACTIVE}`]: blog.isActive,
         [`${CELL_TYPE.POSTED}`]: blog.postDate,
         [`${CELL_TYPE.APPLICATIONS}`]: blog.applications,
-        [`${CELL_TYPE.OPTIONS}`]: blog.id
+        [`${CELL_TYPE.OPTIONS}`]: blog.id,
+        [`${CELL_TYPE.JOB_ID}`]: blog.id
       }
     });
   };
@@ -354,8 +356,9 @@ const BlogPage = () => {
               <Button
                 className={classes.avatarButton}
                 variant="outlined"
-
-              >Update Profile</Button>
+              >
+                Update Profile
+              </Button>
             </div>
             <div className={classes.sidebarItem}>
               <LaptopMacOutlined className={classes.sidebarListIcons} />
@@ -439,12 +442,30 @@ const BlogPage = () => {
     );
   };
 
+  const updateBlogData = (newData, isEdit) => {
+    setAllBlogData(() => {
+      if(isEdit) {
+        let tempBlogData = allBlogData;
+        tempBlogData.some((data, index) => {
+          if(newData.id === data.id) {
+            tempBlogData[index] = newData;
+            return true;
+          };
+          return false;
+        });
+        return [...tempBlogData];
+      }
+      return [...allBlogData, newData]
+    });
+  };
+
   const renderBlogEditor = () => {
     return (
       <div>
         <BlogEditor
           mode={dialogProps.mode}
           setDialogProps={setDialogProps}
+          updateBlogData={updateBlogData}
           data={dialogProps.data}
         />
       </div>)
