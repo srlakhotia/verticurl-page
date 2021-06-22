@@ -23,6 +23,7 @@ import {
   CircularProgress
 } from '@material-ui/core';
 import { useStyles } from './styles';
+import { BlogEditor } from '../../components';
 import {
   MailOutlineOutlined,
   SearchOutlined,
@@ -49,6 +50,12 @@ const BlogPage = () => {
   const [optionDrawerEl, setOptionDrawerEl] = useState(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [allBlogData, setAllBlogData] = useState([]);
+  const [dialogProps, setDialogProps] = useState({
+    mode: null,
+    data: {},
+    isOpen: false
+  });
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -101,7 +108,13 @@ const BlogPage = () => {
   const drawerOptions = [{
     title: 'Edit',
     icon: <EditOutlined />,
-    clickHandler: () => null,
+    clickHandler: (data) => {
+      setDialogProps({
+        data,
+        mode: 'edit',
+        open: true
+      });
+    },
   }, {
     title: 'Re-post',
     icon: <RotateRightOutlined />,
@@ -195,6 +208,7 @@ const BlogPage = () => {
         <div>
           <IconButton
             onClick={handleOptionsClick}
+            data-blog={JSON.stringify(cellData)}
           >
             <MoreHoriz />
           </IconButton>
@@ -224,6 +238,24 @@ const BlogPage = () => {
     }
   };
 
+  const showAddNewJobModal = () => {
+    setDialogProps({
+      mode: 'add',
+      open: true,
+      data: {}
+    });
+  };
+
+  const viewBlog = (e, post) => {
+    if (!(e.target.tagName === 'svg')) {
+      setDialogProps({
+        open: true,
+        mode: 'view',
+        data: post
+      });
+    }
+  };
+
   const renderBlogData = () => {
     return (
       <main className={classes.content}>
@@ -235,7 +267,7 @@ const BlogPage = () => {
           <Button
             className={classes.pageNavButton}
             variant={'outlined'}
-            onClick={() => null}
+            onClick={showAddNewJobModal}
           >
             Add new job
         </Button>
@@ -264,7 +296,11 @@ const BlogPage = () => {
             </TableHead>
             {!isDataLoading && (<TableBody>
               {allBlogData.length > 0 && createRow(allBlogData).map((post, index) => {
-                return <TableRow className={classes.tableRow} key={index}>
+                return <TableRow
+                  className={classes.tableRow}
+                  key={index}
+                  onClick={(e) => viewBlog(e, post)}
+                >
                   {tableColumns.map((col, idx) => {
                     return <TableCell key={idx}>
                       {renderTableCell(col.id, post, idx)}
@@ -287,7 +323,7 @@ const BlogPage = () => {
                       key={index}
                       onClick={handleOptionsClose}
                     >
-                      <div onClick={opt.clickHandler} className={classes.optionMenuItem}>
+                      <div onClick={() => opt.clickHandler(JSON.parse(optionDrawerEl.dataset.blog))} className={classes.optionMenuItem}>
                         <div className={classes.optionMenuIcon}>{opt.icon}</div>
                         <div className={classes.optionMenuText}>{opt.title}</div>
                       </div>
@@ -403,12 +439,23 @@ const BlogPage = () => {
     );
   };
 
+  const renderBlogEditor = () => {
+    return (
+      <div>
+        <BlogEditor
+          mode={dialogProps.mode}
+          setDialogProps={setDialogProps}
+          data={dialogProps.data}
+        />
+      </div>)
+  }
   return (
     <div className={classes.root}>
       <CssBaseline />
       {renderAppHeader()}
       {renderDrawer()}
       {renderBlogData()}
+      {dialogProps.open && renderBlogEditor()}
     </div>
   )
 };
