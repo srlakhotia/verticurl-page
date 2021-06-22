@@ -15,8 +15,8 @@ const colors = {
   table: {
     headBg: '#D8E2E7',
     headText: '#6B7D92',
-
-  }
+  },
+  contentBg: '#EAEEF1'
 };
 
 const getMenuButtons = (theme) => ({
@@ -69,6 +69,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: colors.white,
     color: colors.grey,
   },
+  backdrop: {
+    zIndex: '999'
+  },
   menuButton: {
     ...getMenuButtons(theme),
     [theme.breakpoints.up('sm')]: {
@@ -84,7 +87,15 @@ const useStyles = makeStyles((theme) => ({
 
   },
   toolbarContent: {
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+
+    '& .MuiTabs-indicator': {
+      backgroundColor: colors.skyBlue
+    },
+    ' & .MuiTab-textColorInherit.Mui-selected': {
+      color: colors.skyBlue,
+      fontWeight: 'bold'
+    }
   },
   content: {
     flexGrow: 1,
@@ -98,10 +109,12 @@ const useStyles = makeStyles((theme) => ({
   },
   mailIcon: {
     ...topBarIcons(),
-    verticalAlign: 'top'
+    verticalAlign: 'top',
+    marginRight: '8px'
   },
   settingsIcon: {
-    ...topBarIcons()
+    ...topBarIcons(),
+    marginRight: '8px'
   },
   logoutIcon: {
     ...topBarIcons()
@@ -123,6 +136,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: colors.sideBarActiveBg,
     borderLeft: `5px solid ${colors.skyBlue}`,
     width: 'calc(100% - 5px)'
+  },
+  applicantAvatar: {
+    marginRight: '5px'
   },
   avatarPicture: {
     width: '150px',
@@ -191,12 +207,11 @@ const useStyles = makeStyles((theme) => ({
   },
   tableAvatarBlock: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'left',
     alignItems: 'center',
     width: '85%',
     color: colors.textBlue
   },
-  optionMenu: {},
   optionMenuItem: {
     display: 'flex',
     width: '100%',
@@ -245,6 +260,16 @@ const useStyles = makeStyles((theme) => ({
   },
   noPost: {
     color: colors.grey
+  },
+  endOfTable: {
+    display: 'flex',
+    color: colors.lightGrey,
+    justifyContent: 'center',
+    marginTop: '20px',
+
+    '& > svg': {
+      fontSize: '40px'
+    }
   }
 }));
 

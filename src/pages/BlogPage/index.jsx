@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CssBaseline,
   AppBar,
@@ -18,7 +18,9 @@ import {
   TableCell,
   TableBody,
   Menu,
-  MenuItem
+  MenuItem,
+  Backdrop,
+  CircularProgress
 } from '@material-ui/core';
 import { useStyles } from './styles';
 import {
@@ -38,12 +40,28 @@ import {
   VisibilityOffOutlined,
   EditOutlined
 } from '@material-ui/icons';
-import { jobPostData } from './jobData';
+import axios from 'axios';
+import { GET_ALL_BLOG } from '../../constants/URLs';
+import { MONTH_NAMES } from '../../constants/helpers';
 
 const BlogPage = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
+  const [optionDrawerEl, setOptionDrawerEl] = useState(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [allBlogData, setAllBlogData] = useState([]);
   const classes = useStyles();
+
+  useEffect(() => {
+    setIsDataLoading(true);
+    axios.get(GET_ALL_BLOG)
+      .then(res => {
+        setAllBlogData(res.data);
+        setIsDataLoading(false);
+      })
+      .catch(() => {
+        setIsDataLoading(false);
+      });
+  }, []);
 
   const handleDrawerToggle = () => {
     setIsMobileOpen(!isMobileOpen);
@@ -51,7 +69,7 @@ const BlogPage = () => {
 
   const CELL_TYPE = {
     JOB_TITLE: 'jobTitle',
-    STATUS: 'status',
+    IS_ACTIVE: 'isActive',
     POSTED: 'posted',
     APPLICATIONS: 'applications',
     OPTIONS: 'options'
@@ -62,7 +80,7 @@ const BlogPage = () => {
     minWidth: '20%',
     label: 'JOB TITLE',
   }, {
-    id: CELL_TYPE.STATUS,
+    id: CELL_TYPE.IS_ACTIVE,
     minWidth: '20%',
     label: 'STATUS',
   }, {
@@ -79,7 +97,6 @@ const BlogPage = () => {
     label: 'OPTIONS',
   }];
 
-  const [optionDrawerEl, setOptionDrawerEl] = useState(null);
   const open = Boolean(optionDrawerEl)
   const drawerOptions = [{
     title: 'Edit',
@@ -106,10 +123,10 @@ const BlogPage = () => {
           title: blog.title,
           department: blog.department
         },
-        [`${CELL_TYPE.STATUS}`]: blog.status,
+        [`${CELL_TYPE.IS_ACTIVE}`]: blog.isActive,
         [`${CELL_TYPE.POSTED}`]: blog.postDate,
         [`${CELL_TYPE.APPLICATIONS}`]: blog.applications,
-        [`${CELL_TYPE.OPTIONS}`]: blog.jobId
+        [`${CELL_TYPE.OPTIONS}`]: blog.id
       }
     });
   };
@@ -123,6 +140,7 @@ const BlogPage = () => {
 
   const renderTableCell = (cellType, cellData, idx) => {
     const cellInput = cellData[cellType];
+    const isDraftCell = !cellData[CELL_TYPE.IS_ACTIVE];
     const generateJobTitle = () => {
       return (<div key={idx}>
         <div className={classes.jobTitle}>{cellInput.title}</div>
@@ -135,19 +153,24 @@ const BlogPage = () => {
         key={idx}
         className={classes.tableStatus}
       >
-        <FiberManualRecord className={cellInput === 'active' ? classes.tableStatusIconActive : classes.tableStatusIcon} />
-        {cellInput}
+        <FiberManualRecord className={cellInput ? classes.tableStatusIconActive : classes.tableStatusIcon} />
+        {cellInput ? 'Active' : 'Draft'}
       </div>
     );
 
-    const generatedPostDate = () => (
-      <div key={idx} className={classes.postDate}>
-        {cellInput || '---'}
-      </div>
-    );
+    const generatedPostDate = () => {
+      const getDate = () => {
+        let d = new Date(cellInput);
+        return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+      }
+      const date = isDraftCell ? '---' : getDate();
+      return (<div key={idx} className={classes.postDate}>
+        {date}
+      </div>)
+    };
 
     const generateApplications = () => {
-      if (!cellInput) {
+      if (!cellInput || isDraftCell) {
         return <div className={classes.noPost}>---</div>
       }
       return <div className={classes.tableAvatarBlock}>
@@ -155,10 +178,10 @@ const BlogPage = () => {
           cellInput.map((applicant, index) => {
             if (index <= 2) {
               return (
-                <Avatar key={`${applicant.applicantId}_${index}`} />
+                <Avatar key={`${applicant.id}_${index}`} src={applicant.avatar} className={classes.applicantAvatar} />
               )
             } else if (index === 3) {
-              return <span key={`${applicant.applicantId}_${index}`}>{`+${cellInput.length - 3}`}</span>
+              return <span key={`${applicant.id}_${index}`}>{`+${cellInput.length - 3}`}</span>
             } else {
               return null;
             }
@@ -183,7 +206,7 @@ const BlogPage = () => {
       case CELL_TYPE.JOB_TITLE: {
         return generateJobTitle();
       }
-      case CELL_TYPE.STATUS: {
+      case CELL_TYPE.IS_ACTIVE: {
         return generateStatus();
       }
       case CELL_TYPE.POSTED: {
@@ -217,62 +240,65 @@ const BlogPage = () => {
             Add new job
         </Button>
         </div>
-          <TableContainer className={classes.tableContainer}>
-            <Table className={classes.tableMain}>
-              <TableHead className={classes.tableHead}>
-                <TableRow>
-                  {tableColumns.map((col, index) => {
-                    return (
-                      <TableCell
-                        key={index}
-                        style={{ width: col.minWidth }}
-                        align={"left"}
-                        className={classes.tableHeadCell}
-                      >
-                        {col.label}
-                      </TableCell>
-                    )
-                  }
-                  )}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {createRow(jobPostData).map((post, index) => {
-                  return <TableRow className={classes.tableRow} key={index}>
-                    {tableColumns.map((col, idx) => {
-                      return <TableCell key={idx}>
-                        {renderTableCell(col.id, post, idx)}
-                      </TableCell>
-                    })}
-                  </TableRow>
-                })}
-                <Menu
-                  className={classes.optionMenu}
-                  anchorEl={optionDrawerEl}
-                  getContentAnchorEl={null}
-                  keepMounted
-                  open={open}
-                  onClose={handleOptionsClose}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                  transformOrigin={{ vertical: "top", horizontal: "center" }}
-                >
-                  {drawerOptions.map((opt, index) => {
-                    return (
-                      <MenuItem
-                        key={index}
-                        onClick={handleOptionsClose}
-                      >
-                        <div onClick={opt.clickHandler} className={classes.optionMenuItem}>
-                          <div className={classes.optionMenuIcon}>{opt.icon}</div>
-                          <div className={classes.optionMenuText}>{opt.title}</div>
-                        </div>
-                      </MenuItem>
-                    )
+        {<Backdrop className={classes.backdrop} open={isDataLoading}>
+          <CircularProgress color="inherit" />
+        </Backdrop>}
+        <TableContainer className={classes.tableContainer}>
+          <Table className={classes.tableMain}>
+            <TableHead className={classes.tableHead}>
+              <TableRow>
+                {tableColumns.map((col, index) => {
+                  return (
+                    <TableCell
+                      key={index}
+                      style={{ width: col.minWidth }}
+                      align={"left"}
+                      className={classes.tableHeadCell}
+                    >
+                      {col.label}
+                    </TableCell>
+                  )
+                }
+                )}
+              </TableRow>
+            </TableHead>
+            {!isDataLoading && (<TableBody>
+              {allBlogData.length > 0 && createRow(allBlogData).map((post, index) => {
+                return <TableRow className={classes.tableRow} key={index}>
+                  {tableColumns.map((col, idx) => {
+                    return <TableCell key={idx}>
+                      {renderTableCell(col.id, post, idx)}
+                    </TableCell>
                   })}
-                </Menu>
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableRow>
+              })}
+              <Menu
+                anchorEl={optionDrawerEl}
+                getContentAnchorEl={null}
+                keepMounted
+                open={open}
+                onClose={handleOptionsClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                transformOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                {drawerOptions.map((opt, index) => {
+                  return (
+                    <MenuItem
+                      key={index}
+                      onClick={handleOptionsClose}
+                    >
+                      <div onClick={opt.clickHandler} className={classes.optionMenuItem}>
+                        <div className={classes.optionMenuIcon}>{opt.icon}</div>
+                        <div className={classes.optionMenuText}>{opt.title}</div>
+                      </div>
+                    </MenuItem>
+                  )
+                })}
+              </Menu>
+            </TableBody>)}
+          </Table>
+        </TableContainer>
+        <div className={classes.endOfTable}><MoreHoriz /></div>
       </main>);
   };
 
@@ -359,7 +385,7 @@ const BlogPage = () => {
           >
             <SearchOutlined />
           </IconButton>
-          <Tabs value={0} onChange={() => null} aria-label="Menu bar" scrollButtons="auto">
+          <Tabs value={0} onChange={() => null} aria-label="Menu bar" scrollButtons="auto" variant="scrollable">
             <Tab label="Blog" />
             <Tab label="Questions" />
             <Tab label="Company" />
