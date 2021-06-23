@@ -185,7 +185,7 @@ const BlogPage = () => {
     };
 
     const generateApplications = () => {
-      if (!cellInput || isDraftCell) {
+      if (!cellInput || isDraftCell || !cellInput.length) {
         return <div className={classes.noPost}>---</div>
       }
       return <div className={classes.tableAvatarBlock}>

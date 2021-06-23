@@ -34,6 +34,10 @@ const BlogEditor = (props) => {
     jobDepartment: data.jobTitle?.department || ''
   });
   const [open, setOpen] = useState(true);
+  const [error, setError] = useState({
+    jobTitle: '',
+    jobDepartment: ''
+  })
 
   const MODES = {
     ADD: 'add',
@@ -95,6 +99,22 @@ const BlogEditor = (props) => {
     handleClose();
   };
 
+  const validateField = (value, field) => {
+    if(!value.trim()) {
+      setError({
+        ...error,
+        [`${field}`]: 'This is required field'
+      });
+    } else {
+      if(error[field]) {
+        setError({
+          ...error,
+          [`${field}`]: ''
+        });
+      }
+    }
+  }
+
   const renderFormFields = (editMode = false) => {
     return (
       <div>
@@ -104,6 +124,8 @@ const BlogEditor = (props) => {
             margin={'normal'}
             required
             fullWidth
+            error={error.jobTitle}
+            helperText={error.jobTitle}
             id={'job-title'}
             label={'Job Title'}
             name={'job_title'}
@@ -116,12 +138,15 @@ const BlogEditor = (props) => {
                 jobTitle: e.target.value
               })
             }
+            onBlur={(e) => validateField(e.target.value, 'jobTitle')}
           />
           <TextField
             variant={'outlined'}
             margin={'normal'}
             required
             fullWidth
+            error={error.jobDepartment}
+            helperText={error.jobDepartment}
             id={'job-department'}
             label={'Job Department'}
             name={'job_department'}
@@ -132,6 +157,7 @@ const BlogEditor = (props) => {
                 jobDepartment: e.target.value
               })
             }
+            onBlur={(e) => validateField(e.target.value, 'jobDepartment')}
           />
           {editMode && data.applications.length > 0 && (
             <div>
@@ -164,6 +190,7 @@ const BlogEditor = (props) => {
           type={'submit'}
           variant={'contained'}
           color={'primary'}
+          disabled={error.jobTitle || error.jobDepartment}
           onClick={() => submitForm(MODES.ADD, true)}
         >
           Add
@@ -172,6 +199,7 @@ const BlogEditor = (props) => {
           variant={'text'}
           color={'secondary'}
           onClick={() => submitForm(MODES.ADD)}
+          disabled={error.jobTitle || error.jobDepartment}
         >
           Save as draft
         </Button>
@@ -190,6 +218,7 @@ const BlogEditor = (props) => {
           variant={'contained'}
           color={'primary'}
           onClick={() => submitForm(MODES.EDIT, true)}
+          disabled={error.jobTitle || error.jobDepartment}
         >
           Save
         </Button>
@@ -199,6 +228,7 @@ const BlogEditor = (props) => {
             variant={'text'}
             color={'primary'}
             onClick={() => submitForm(MODES.EDIT)}
+            disabled={error.jobTitle || error.jobDepartment}
           >
             Save as draft
           </Button>
