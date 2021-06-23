@@ -39,7 +39,9 @@ import {
   RotateRightOutlined,
   DeleteOutlineOutlined,
   VisibilityOffOutlined,
-  EditOutlined
+  EditOutlined,
+  ExpandMore,
+  ExpandLess
 } from '@material-ui/icons';
 import axios from 'axios';
 import { GET_ALL_BLOG } from '../../constants/URLs';
@@ -54,6 +56,10 @@ const BlogPage = () => {
     mode: null,
     data: {},
     isOpen: false
+  });
+  const [sortHelper, setSortHelper] = useState({
+    field: 'id',
+    isAscending: true
   });
 
   const classes = useStyles();
@@ -75,9 +81,9 @@ const BlogPage = () => {
   };
 
   const CELL_TYPE = {
-    JOB_TITLE: 'jobTitle',
+    JOB_TITLE: 'title',
     IS_ACTIVE: 'isActive',
-    POSTED: 'posted',
+    POSTED: 'postDate',
     APPLICATIONS: 'applications',
     OPTIONS: 'options',
     JOB_ID: 'id'
@@ -131,7 +137,25 @@ const BlogPage = () => {
   }];
 
   const createRow = (blogData) => {
-    return blogData.map(blog => {
+    const sortData = () => {
+      const sorted = blogData.sort((a, b) => {
+        if(a[sortHelper.field] < b[sortHelper.field]) {
+          return -1;
+        }
+        if(a[sortHelper.field] > b[sortHelper.field]) {
+          return 1;
+        }
+        return 0;
+      });
+      if (sortHelper.isAscending) {
+        return sorted;
+      } else {
+        return sorted.reverse();
+      }
+    };
+
+    const sortedData = sortData();
+    return sortedData.map(blog => {
       return {
         [`${CELL_TYPE.JOB_TITLE}`]: {
           title: blog.title,
@@ -149,9 +173,10 @@ const BlogPage = () => {
   const handleOptionsClick = (e) => {
     setOptionDrawerEl(e.currentTarget)
   };
+
   const handleOptionsClose = () => {
     setOptionDrawerEl(null)
-  }
+  };
 
   const renderTableCell = (cellType, cellData, idx) => {
     const cellInput = cellData[cellType];
@@ -258,6 +283,29 @@ const BlogPage = () => {
     }
   };
 
+  const sortTableData = (sortField) => {
+    const validSortFields = [
+      CELL_TYPE.JOB_TITLE,
+      CELL_TYPE.IS_ACTIVE,
+      CELL_TYPE.POSTED
+    ]
+    if (validSortFields.indexOf(sortField) === -1) {
+      return null;
+    } else {
+      if (sortHelper.field === sortField) {
+        setSortHelper({
+          ...sortHelper,
+          isAscending: !sortHelper.isAscending
+        });
+      } else {
+        setSortHelper({
+          field: sortField,
+          isAscending: true
+        });
+      }
+    }
+  }
+
   const renderBlogData = () => {
     return (
       <main className={classes.content}>
@@ -288,8 +336,11 @@ const BlogPage = () => {
                       style={{ width: col.minWidth }}
                       align={"left"}
                       className={classes.tableHeadCell}
+                      onClick={() => sortTableData(col.id)}
                     >
                       {col.label}
+                      {col.id === sortHelper.field && !sortHelper.isAscending && <span className={classes.sortIcon}><ExpandLess /></span>}
+                      {col.id === sortHelper.field && sortHelper.isAscending && <span className={classes.sortIcon}><ExpandMore /></span>}
                     </TableCell>
                   )
                 }
@@ -444,10 +495,10 @@ const BlogPage = () => {
 
   const updateBlogData = (newData, isEdit) => {
     setAllBlogData(() => {
-      if(isEdit) {
+      if (isEdit) {
         let tempBlogData = allBlogData;
         tempBlogData.some((data, index) => {
-          if(newData.id === data.id) {
+          if (newData.id === data.id) {
             tempBlogData[index] = newData;
             return true;
           };

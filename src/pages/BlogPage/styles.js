@@ -246,7 +246,14 @@ const useStyles = makeStyles((theme) => ({
   },
   tableHeadCell: {
     color: colors.table.headText,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    cursor: 'pointer'
+  },
+  sortIcon: {
+    verticalAlign: 'initial',
+    '&>svg': {
+      fontSize: '1rem'
+    }
   },
   jobTitle: {
     color: colors.textBlue
