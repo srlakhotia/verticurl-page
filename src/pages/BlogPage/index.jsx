@@ -44,7 +44,7 @@ import {
   ExpandLess
 } from '@material-ui/icons';
 import axios from 'axios';
-import { GET_ALL_BLOG } from '../../constants/URLs';
+import { GET_ALL_BLOG, DELETE_BLOG, PUT_BLOG } from '../../constants/URLs';
 import { MONTH_NAMES } from '../../constants/helpers';
 
 const BlogPage = () => {
@@ -71,7 +71,8 @@ const BlogPage = () => {
         setAllBlogData(res.data);
         setIsDataLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         setIsDataLoading(false);
       });
   }, []);
@@ -86,6 +87,7 @@ const BlogPage = () => {
     POSTED: 'postDate',
     APPLICATIONS: 'applications',
     OPTIONS: 'options',
+    IS_HIDDEN: 'isHidden',
     JOB_ID: 'id'
   }
 
@@ -111,7 +113,51 @@ const BlogPage = () => {
     label: 'OPTIONS',
   }];
 
-  const open = Boolean(optionDrawerEl)
+  const open = Boolean(optionDrawerEl);
+
+  const deletePost = (postData) => {
+    const URL = DELETE_BLOG.replace(':id', postData.id);
+    axios
+      .delete(URL)
+      .then(res => {
+        setAllBlogData(() => {
+          let tempBlogData = allBlogData;
+          let removedIndex = -1;
+          tempBlogData.some((data, index) => {
+            if (res.data.id === data.id) {
+              removedIndex = index;
+              return true;
+            };
+            return false;
+          });
+          tempBlogData.splice(removedIndex, 1);
+          return [...tempBlogData];
+        });
+      })
+      .catch(err => {
+        console.error(err)
+      })
+  };
+
+  const updatePost = (url, payload) => {
+    axios
+    .put(url, payload)
+    .then(res => {
+      setAllBlogData(() => {
+        let tempBlogData = allBlogData;
+        tempBlogData.some((data, index) => {
+          if (res.data.id === data.id) {
+            tempBlogData[index] = res.data;
+            return true;
+          };
+          return false;
+        });
+        return [...tempBlogData];
+      });
+    })
+    .catch(err => console.error(err))
+  }
+
   const drawerOptions = [{
     title: 'Edit',
     icon: <EditOutlined />,
@@ -125,24 +171,50 @@ const BlogPage = () => {
   }, {
     title: 'Re-post',
     icon: <RotateRightOutlined />,
-    clickHandler: () => null
+    clickHandler: (data) => {
+      const URL = PUT_BLOG.replace(':id', data.id);
+      const payload = {
+        id: data.id,
+        postDate: (new Date()).getTime(),
+        title: data.title.title,
+        department: data.title.department,
+        isActive: data.isActive,
+        applications: data.applications,
+        isHidden: data.isHidden
+      }
+      updatePost(URL, payload);
+    }
   }, {
     title: 'Delete',
     icon: <DeleteOutlineOutlined />,
-    clickHandler: () => null
+    clickHandler: (data) => {
+      deletePost(data);
+    }
   }, {
     title: 'Hide',
     icon: <VisibilityOffOutlined />,
-    clickHandler: () => null
+    clickHandler: (data) => {
+      const URL = PUT_BLOG.replace(':id', data.id);
+      const payload = {
+        id: data.id,
+        postDate: data.postDate,
+        title: data.title.title,
+        department: data.title.department,
+        isActive: data.isActive,
+        applications: data.applications,
+        isHidden: true
+      }
+      updatePost(URL, payload);
+    }
   }];
 
   const createRow = (blogData) => {
     const sortData = () => {
       const sorted = blogData.sort((a, b) => {
-        if(a[sortHelper.field] < b[sortHelper.field]) {
+        if (a[sortHelper.field] < b[sortHelper.field]) {
           return -1;
         }
-        if(a[sortHelper.field] > b[sortHelper.field]) {
+        if (a[sortHelper.field] > b[sortHelper.field]) {
           return 1;
         }
         return 0;
@@ -162,6 +234,7 @@ const BlogPage = () => {
           department: blog.department
         },
         [`${CELL_TYPE.IS_ACTIVE}`]: blog.isActive,
+        [`${CELL_TYPE.IS_HIDDEN}`]: blog.isHidden,
         [`${CELL_TYPE.POSTED}`]: blog.postDate,
         [`${CELL_TYPE.APPLICATIONS}`]: blog.applications,
         [`${CELL_TYPE.OPTIONS}`]: blog.id,
@@ -355,9 +428,10 @@ const BlogPage = () => {
                   onClick={(e) => viewBlog(e, post)}
                 >
                   {tableColumns.map((col, idx) => {
-                    return <TableCell key={idx}>
+                    return !post.isHidden ? <TableCell key={idx}>
                       {renderTableCell(col.id, post, idx)}
                     </TableCell>
+                      : null;
                   })}
                 </TableRow>
               })}
