@@ -549,7 +549,7 @@ const BlogPage = () => {
           >
             <SearchOutlined />
           </IconButton>
-          <Tabs value={0} onChange={() => null} aria-label="Menu bar" scrollButtons="auto" variant="scrollable">
+          <Tabs value={0} aria-label="Menu bar" scrollButtons="auto" variant="scrollable">
             <Tab label="Blog" />
             <Tab label="Questions" />
             <Tab label="Company" />
