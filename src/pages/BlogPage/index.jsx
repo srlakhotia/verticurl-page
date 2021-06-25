@@ -512,6 +512,7 @@ const BlogPage = () => {
             variant="temporary"
             open={isMobileOpen}
             onClose={handleDrawerToggle}
+            data-selector={'drawer-toggle'}
             classes={{
               paper: classes.drawerPaper,
             }}
@@ -538,6 +539,7 @@ const BlogPage = () => {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
+            data-selector={"drawer-toggle-button"}
             className={classes.menuButton}
           >
             <MenuOutlined />
