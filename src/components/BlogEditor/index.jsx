@@ -22,14 +22,16 @@ const BlogEditor = (props) => {
     mode: PropTypes.oneOf(['add', 'view', 'edit']),
     setModalOpen: PropTypes.func,
     updateBlogData: PropTypes.func,
-    data: PropTypes.object
+    data: PropTypes.object,
+    dataSelector: PropTypes.string,
   };
 
   const {
     mode = 'add',
     setDialogProps = () => null,
     updateBlogData = () => null,
-    data = {}
+    data = {},
+    dataSelector = ''
   } = props;
 
   const classes = useStyles();
@@ -97,7 +99,7 @@ const BlogEditor = (props) => {
         .then(res => {
           updateBlogData(res.data)
         })
-        .catch(err => { console.error('err', err) });
+        .catch(err => { console.log('err', err) });
     } else {
       const URL = PUT_BLOG.replace(':id', data.id);
       payload = {
@@ -110,7 +112,7 @@ const BlogEditor = (props) => {
         .then(res => {
           updateBlogData(res.data, true)
         })
-        .catch(err => { console.error('err', err) });
+        .catch(err => { console.log('err', err) });
     }
     handleClose();
   };
@@ -173,6 +175,7 @@ const BlogEditor = (props) => {
               })
             }
             onBlur={(e) => validateField(e.target.value, 'jobTitle')}
+            data-selector={'job-title-field'}
           />
           <TextField
             variant={'outlined'}
@@ -192,8 +195,9 @@ const BlogEditor = (props) => {
               })
             }
             onBlur={(e) => validateField(e.target.value, 'jobDepartment')}
+            data-selector={'job-department-field'}
           />
-          {editMode && data.applications.length > 0 && (
+          {editMode && data.applications && data.applications.length > 0 && (
             <>
               <Divider
                 variant={'fullWidth'}
@@ -207,6 +211,7 @@ const BlogEditor = (props) => {
   };
 
   const renderAddModal = () => {
+    const disabledButtons = !!(error.jobTitle || error.jobDepartment);
     return (<>
       <DialogTitle>Add Job</DialogTitle>
       <DialogContent>
@@ -217,7 +222,8 @@ const BlogEditor = (props) => {
           type={'submit'}
           variant={'contained'}
           color={'primary'}
-          disabled={!!(error.jobTitle || error.jobDepartment)}
+          disabled={disabledButtons}
+          data-selector={'submit-addForm'}
           onClick={() => submitForm(MODES.ADD, true)}
         >
           Add
@@ -226,7 +232,8 @@ const BlogEditor = (props) => {
           variant={'text'}
           color={'secondary'}
           onClick={() => submitForm(MODES.ADD)}
-          disabled={!!(error.jobTitle || error.jobDepartment)}
+          data-selector={'submit-addForm-draft'}
+          disabled={disabledButtons}
         >
           Save as draft
         </Button>
@@ -234,6 +241,7 @@ const BlogEditor = (props) => {
     </>);
   };
   const renderEditModal = () => {
+    const disabledButton = !!(error.jobTitle || error.jobDepartment);
     return (<>
       <DialogTitle>Edit Job</DialogTitle>
       <DialogContent>
@@ -245,7 +253,8 @@ const BlogEditor = (props) => {
           variant={'contained'}
           color={'primary'}
           onClick={() => submitForm(MODES.EDIT, true)}
-          disabled={error.jobTitle || error.jobDepartment}
+          disabled={disabledButton}
+          data-selector={'edit-form-submit'}
         >
           Save
         </Button>
@@ -255,7 +264,8 @@ const BlogEditor = (props) => {
             variant={'text'}
             color={'primary'}
             onClick={() => submitForm(MODES.EDIT)}
-            disabled={error.jobTitle || error.jobDepartment}
+            disabled={disabledButton}
+            data-selector={'edit-form-save-draft'}
           >
             Save as draft
           </Button>
@@ -322,6 +332,7 @@ const BlogEditor = (props) => {
       fullWidth
       onClose={handleClose}
       maxWidth={'sm'}
+      data-selector={dataSelector}
     >
       <DialogContent>
         {mode === MODES.ADD && renderAddModal()}

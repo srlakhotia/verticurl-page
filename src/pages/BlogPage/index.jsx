@@ -47,6 +47,7 @@ import axios from 'axios';
 import { GET_ALL_BLOG, DELETE_BLOG, PUT_BLOG } from '../../constants/URLs';
 import { MONTH_NAMES } from '../../constants/helpers';
 
+let updateBlogData = () => null;
 const BlogPage = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [optionDrawerEl, setOptionDrawerEl] = useState(null);
@@ -72,7 +73,7 @@ const BlogPage = () => {
         setIsDataLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.log(err);
         setIsDataLoading(false);
       });
   }, []);
@@ -135,7 +136,7 @@ const BlogPage = () => {
         });
       })
       .catch(err => {
-        console.error(err)
+        console.log(err)
       })
   };
 
@@ -155,7 +156,7 @@ const BlogPage = () => {
         return [...tempBlogData];
       });
     })
-    .catch(err => console.error(err))
+    .catch(err => console.log(err))
   }
 
   const drawerOptions = [{
@@ -305,10 +306,11 @@ const BlogPage = () => {
 
     const generateOptions = () => {
       return (
-        <div>
+        <div key={idx}>
           <IconButton
             onClick={handleOptionsClick}
             data-blog={JSON.stringify(cellData)}
+            data-selector={`options-menu-${idx}`}
           >
             <MoreHoriz />
           </IconButton>
@@ -391,6 +393,7 @@ const BlogPage = () => {
             className={classes.pageNavButton}
             variant={'outlined'}
             onClick={showAddNewJobModal}
+            data-selector={'add-job'}
           >
             Add new job
         </Button>
@@ -410,6 +413,7 @@ const BlogPage = () => {
                       align={"left"}
                       className={classes.tableHeadCell}
                       onClick={() => sortTableData(col.id)}
+                      data-selector={`table-head-${col.id}`}
                     >
                       {col.label}
                       {col.id === sortHelper.field && !sortHelper.isAscending && <span className={classes.sortIcon}><ExpandLess /></span>}
@@ -426,6 +430,7 @@ const BlogPage = () => {
                   className={classes.tableRow}
                   key={index}
                   onClick={(e) => viewBlog(e, post)}
+                  data-selector={`view-blog-${index}`}
                 >
                   {tableColumns.map((col, idx) => {
                     return !post.isHidden ? <TableCell key={idx}>
@@ -449,8 +454,13 @@ const BlogPage = () => {
                     <MenuItem
                       key={index}
                       onClick={handleOptionsClose}
+                      data-selector={`options-menu-item-${index}`}
                     >
-                      <div onClick={() => opt.clickHandler(JSON.parse(optionDrawerEl.dataset.blog))} className={classes.optionMenuItem}>
+                      <div
+                        onClick={() => opt.clickHandler(JSON.parse(optionDrawerEl.dataset.blog))}
+                        className={classes.optionMenuItem}
+                        data-selector={`options-menu-item-comp-${index}`}
+                      >
                         <div className={classes.optionMenuIcon}>{opt.icon}</div>
                         <div className={classes.optionMenuText}>{opt.title}</div>
                       </div>
@@ -569,7 +579,7 @@ const BlogPage = () => {
     );
   };
 
-  const updateBlogData = (newData, isEdit) => {
+  updateBlogData = (newData, isEdit) => {
     setAllBlogData(() => {
       if (isEdit) {
         let tempBlogData = allBlogData;
@@ -594,6 +604,7 @@ const BlogPage = () => {
           setDialogProps={setDialogProps}
           updateBlogData={updateBlogData}
           data={dialogProps.data}
+          dataSelector={'blog-editor'}
         />
       </div>)
   }
@@ -608,4 +619,5 @@ const BlogPage = () => {
   )
 };
 
+export { updateBlogData };
 export default BlogPage;

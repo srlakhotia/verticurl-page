@@ -121,7 +121,7 @@ export default [
   },
   {
    "id": "11",
-   "title": "Direct Brand Representative",
+   "title": "Customer Accounts Consultant",
    "department": "Markets",
    "isActive": false,
    "postDate": 1624566086,
